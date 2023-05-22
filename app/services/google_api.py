@@ -2,10 +2,8 @@ from datetime import datetime
 
 from aiogoogle import Aiogoogle
 
+from app.constants import CHARITY_SHEET, FORMAT
 from app.core.config import settings
-
-
-FORMAT = "%Y/%m/%d %H:%M:%S"
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
@@ -14,11 +12,7 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     spreadsheets_body = {
         'properties': {'title': f'Отчет на {now_date_time}',
                        'locale': 'ru_RU'},
-        'sheets': [{'properties': {'sheetType': 'GRID',
-                                   'sheetId': 0,
-                                   'title': 'Лист1',
-                                   'gridProperties': {'rowCount': 100,
-                                                      'columnCount': 11}}}]
+        'sheets': [CHARITY_SHEET]
     }
     response = await wrapper_services.as_service_account(
         service.spreadsheets.create(json=spreadsheets_body)
@@ -65,9 +59,9 @@ async def spreadsheets_update_value(
         'values': table_values,
     }
     await wrapper_services.as_service_account(
-        service.spreadsheets.values.update(
+        service.spreadsheets.values.append(
             spreadsheetId=spreadsheetid,
-            range='A1:E30',
+            range=f'A1:{len(table_values)}',
             valueInputOption='USER_ENTERED',
             json=update_body,
         )
